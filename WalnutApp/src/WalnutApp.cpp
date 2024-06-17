@@ -68,46 +68,74 @@ public:
 	{
 		ImGui::Begin("Settings");
 		ImGui::Text("Last render: %.3fms", m_LastRenderTime);
+		ImGui::Text("Accumulation Frames: %d", m_Renderer.GetFrameIndex());
 		if (ImGui::Button("Render"))
 		{
 			Render();
 		}
 
-		ImGui::Checkbox("Accumulate", &m_Renderer.GetSettings().Accumulate);
 
 		if (ImGui::Button("Reset"))
 			m_Renderer.ResetFrameIndex();
 
+		ImGui::SameLine();
+		ImGui::Checkbox("Accumulate", &m_Renderer.GetSettings().Accumulate);
+
 		ImGui::End();
 
 		ImGui::Begin("Scene");
-		for (size_t i = 0; i < m_Scene.Spheres.size(); i++)
+		if (ImGui::BeginTabBar("SceneTabs"))
 		{
-			ImGui::PushID(i);
+			if (ImGui::BeginTabItem("Objects"))
+			{
+				if (ImGui::CollapsingHeader("Spheres", ImGuiTreeNodeFlags_DefaultOpen))
+				{
+					for (size_t i = 0; i < m_Scene.Spheres.size(); i++)
+					{
+						ImGui::PushID(i);
 
-			Sphere& sphere = m_Scene.Spheres[i];
-			ImGui::DragFloat3("Position", glm::value_ptr(sphere.Position), 0.1f);
-			ImGui::DragFloat("Radius", &sphere.Radius, 0.1f);
-			ImGui::DragInt("Material", &sphere.MaterialIndex, 1.0f, 0, (int)m_Scene.Materials.size() - 1);
+						Sphere& sphere = m_Scene.Spheres[i];
+						ImGui::DragFloat3("Position", glm::value_ptr(sphere.Position), 0.1f);
+						ImGui::DragFloat("Radius", &sphere.Radius, 0.1f);
+						ImGui::SliderInt("Material", &sphere.MaterialIndex, 0, (int)m_Scene.Materials.size() - 1);
 
-			ImGui::Separator();
+						ImGui::Separator();
+
+						ImGui::PopID();
+					}
+				}
+				if (ImGui::CollapsingHeader("Materials"))
+				{
+					for (size_t i = 0; i < m_Scene.Materials.size(); i++)
+					{
+						ImGui::PushID(i);
+
+						Material& material = m_Scene.Materials[i];
+						//ImGui::LabelText("label", "asd"); // material name or id | in future can be added dynamicaly
+						ImGui::ColorEdit3("Albedo", glm::value_ptr(material.Albedo));
+						ImGui::DragFloat("Roughness", &material.Roughness, 0.05f, 0.0f, 1.0f);
+						//ImGui::DragFloat("Metallic", &material.Metallic, 0.05f, 0.0f, 1.0f);
+						ImGui::ColorEdit3("Emission Color", glm::value_ptr(material.EmissionColor));
+						ImGui::DragFloat("Emission Power", &material.EmissionPower, 0.05f, 0.0f, FLT_MAX);
+
+						ImGui::Separator();
+
+						ImGui::PopID();
+					}
+				}
+				ImGui::EndTabItem();
+			}
 			
-			ImGui::PopID();
-		}
-		for (size_t i = 0; i < m_Scene.Materials.size(); i++)
-		{
-			ImGui::PushID(i);
-
-			Material& material = m_Scene.Materials[i];
-			ImGui::ColorEdit3("Albedo", glm::value_ptr(material.Albedo));
-			ImGui::DragFloat("Roughness", &material.Roughness, 0.05f, 0.0f, 1.0f);
-			ImGui::DragFloat("Metallic", &material.Metallic, 0.05f, 0.0f, 1.0f);
-			ImGui::ColorEdit3("Emission Color", glm::value_ptr(material.EmissionColor));
-			ImGui::DragFloat("Emission Power", &material.EmissionPower, 0.05f, 0.0f, FLT_MAX);
-
-			ImGui::Separator();
-
-			ImGui::PopID();
+			if (ImGui::BeginTabItem("SkyLight"))
+			{
+				ImGui::ColorEdit3("Sky Color", glm::value_ptr(m_Renderer.GetSettings().skyColor)); //m_Renderer.GetSettings().SkyColor
+				if (ImGui::Button("Default Sky Color"))
+					m_Renderer.GetSettings().skyColor = glm::vec3{ 0.6f, 0.7f, 0.9f };
+				ImGui::Separator();
+				ImGui::Checkbox("Sky Color Contribution", &m_Renderer.GetSettings().skyColorContribute);
+				ImGui::EndTabItem();
+			}
+			ImGui::EndTabBar();
 		}
 		ImGui::End();
 

@@ -15,6 +15,9 @@ public:
 	struct Settings
 	{
 		bool Accumulate = true;
+
+		glm::vec3 skyColor{ 0.6f, 0.7f, 0.9f };
+		bool skyColorContribute = true;
 	};
 public:
 	Renderer() = default;
@@ -24,6 +27,7 @@ public:
 
 	std::shared_ptr<Walnut::Image> GetFinalImage() const { return m_FinalImage; }
 
+	uint32_t GetFrameIndex() { return m_FrameIndex; }
 	void ResetFrameIndex() { m_FrameIndex = 1; }
 	Settings& GetSettings() { return m_Settings; }
 private:
