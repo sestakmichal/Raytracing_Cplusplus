@@ -170,7 +170,6 @@ glm::vec4 Renderer::PerPixel(uint32_t x, uint32_t y)
 		light += material.GetEmission();
 
 		ray.Origin = payload.WorldPosition + payload.WorldNormal * 0.0001f;
-		//ray.Direction = glm::normalize(payload.WorldNormal + Walnut::Random::InUnitSphere());
 		ray.Direction = glm::normalize(payload.WorldNormal + Utils::InUnitSphere(seed));
 	}
 
